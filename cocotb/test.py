@@ -32,7 +32,7 @@ async def test_start(dut):
 
   # Read ID
   await send_instr(dut, InstructionLW(x1, tp, 0x8).encode())
-  assert await read_reg(dut, x1) == ord('2') | (ord('.') << 8) | (ord('F') << 16) | (ord('G') << 24)
+  assert await read_reg(dut, x1) == ord('1') | (ord('0') << 8) | (ord('S') << 16) | (ord('W') << 24)
   
   for i in range(8):
     await send_instr(dut, InstructionADDI(i+8, x0, 0x102*i).encode())
@@ -1092,7 +1092,7 @@ async def test_random(dut):
     seed = random.randint(0, 0xFFFFFFFF)
     #seed = 2911169147
 
-    scratch_ram = False
+    scratch_ram = True
     if scratch_ram:
         RAM_SIZE = 512
         RAM = []

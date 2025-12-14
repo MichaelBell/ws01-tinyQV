@@ -252,7 +252,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     // Read data
     always @(*) begin
         case (connect_peripheral)
-            PERI_ID:          data_from_read = "GF.2";
+            PERI_ID:          data_from_read = "WS01";
             PERI_GPIO_OUT_SEL:data_from_read = {25'h0, gpio_out_sel, 6'h0};
             PERI_DEBUG_UART_STATUS: data_from_read = {31'h0, debug_uart_tx_busy};
             PERI_TIME_LIMIT:  data_from_read = {25'h0, time_limit, 2'b11};
