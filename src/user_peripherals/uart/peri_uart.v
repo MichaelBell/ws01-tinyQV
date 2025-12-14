@@ -119,7 +119,7 @@ module tqvp_uart_wrapper #(
     assign data_out = address == 6'h0 ? {24'd0, uart_rx_buf_data} :
                       address == 6'h4 ? {30'd0, uart_rx_buffered, uart_tx_busy} :
                       address == 6'h8 ? {19'd0, baud_divider} : 
-                      address == 6'hc ? {31'd0, rxd_select} : 32'd0;
+                      address == 6'hc ? {30'd0, rxd_select} : 32'd0;
     assign data_ready = 1;
 
     assign uo_out = {4{uart_rts, uart_txd}};
