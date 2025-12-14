@@ -18,10 +18,11 @@ scl = os.getenv("SCL", "gf180mcu_fd_sc_mcu7t5v0")
 gl = os.getenv("GL", False)
 slot = os.getenv("SLOT", "1x1")
 
-hdl_toplevel = "chip_top"
+hdl_toplevel = "tb_top"
 
 async def set_defaults(dut):
-    dut.input_PAD.value = 0
+    dut.uart_rx.value = 1
+    dut.ui_in.value = 0
 
 async def enable_power(dut):
     dut.VDD.value = 1
@@ -42,18 +43,14 @@ async def reset(clk, reset, dut, active_low=True):
     reset.value = not active_low
     await Timer(200, "ns")
 
-    dut.bidir_PAD.value[12] = 0
-    dut.bidir_PAD.value[10] = 0
-    dut.bidir_PAD.value[9] = 1
+    dut.qspi_data.value = 1
     await Timer(800, "ns")
     await RisingEdge(clk)
 
     reset.value = active_low
     await FallingEdge(clk)
 
-    dut.bidir_PAD.value[12] = 'Z'
-    dut.bidir_PAD.value[10] = "Z"
-    dut.bidir_PAD.value[9] = "Z"
+    dut.qspi_data.value = "ZZZZ"
 
     cocotb.log.info("Reset deasserted.")
 
@@ -66,6 +63,243 @@ async def start_up(dut):
     await start_clock(dut.clk_PAD)
     await reset(dut.clk_PAD, dut.rst_n_PAD, dut)
 
+def check_qspi_data_out(dut, val):
+    assert dut.bidir_PAD.value[9] == (1 if val & 1 else 0)
+    assert dut.bidir_PAD.value[10] == (1 if val & 2 else 0)
+    assert dut.bidir_PAD.value[12] == (1 if val & 4 else 0)
+    assert dut.bidir_PAD.value[13] == (1 if val & 8 else 0)
+
+def check_spi_data_out(dut, val):
+    assert dut.bidir_PAD.value[9] == (1 if val & 1 else 0)
+    assert dut.bidir_PAD.value[10] == 'Z'
+
+def set_qspi_data(dut, val):
+    dut.qspi_data.value = val
+
+async def setup_flash(dut):
+    assert dut.bidir_PAD.value[8] == 0
+    assert dut.bidir_PAD.value[14] == 1
+    assert dut.bidir_PAD.value[15] == 1
+    assert dut.bidir_PAD.value[11] == 0
+
+    # Reset
+    cmd = 0xFF
+    for i in range(8):
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 1
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        cmd <<= 1
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == (0 if i < 7 else 1)
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+    for _ in range(2):
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 1
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+    await ClockCycles(dut.clk_PAD, 1, False)
+    assert dut.bidir_PAD.value[8] == 0
+    assert dut.bidir_PAD.value[14] == 1
+    assert dut.bidir_PAD.value[15] == 1
+    assert dut.bidir_PAD.value[11] == 0
+
+    # Command
+    cmd = 0xEB
+    for i in range(8):
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 1
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        cmd <<= 1
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+    # Address
+    addr = 0
+    for i in range(6):
+        check_qspi_data_out(dut, (addr >> (20 - i * 4)) & 0xF)
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 1
+        check_qspi_data_out(dut, (addr >> (20 - i * 4)) & 0xF)
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+    # Continuous read
+    for i in range(2):
+        check_qspi_data_out(dut, 0xA)
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 1
+        check_qspi_data_out(dut, 0xA)
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+    for i in range(8):
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 1
+        if i == 7:
+            break
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 0
+        assert dut.bidir_PAD.value[14] == 1
+        assert dut.bidir_PAD.value[15] == 1
+        assert dut.bidir_PAD.value[11] == 0
+
+async def setup_ram(dut, ram_a):
+    assert dut.bidir_PAD.value[8] == 1
+    assert dut.bidir_PAD.value[14] == (0 if ram_a else 1)
+    assert dut.bidir_PAD.value[15] == (1 if ram_a else 0)
+    assert dut.bidir_PAD.value[11] == 0
+
+    # Command
+    cmd = 0x35
+    for i in range(8):
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 1
+        assert dut.bidir_PAD.value[14] == (0 if ram_a else 1)
+        assert dut.bidir_PAD.value[15] == (1 if ram_a else 0)
+        assert dut.bidir_PAD.value[11] == 1
+        check_spi_data_out(dut, (1 if cmd & 0x80 else 0))
+        cmd <<= 1
+        if i == 7:
+            break
+        await ClockCycles(dut.clk_PAD, 1, False)
+        assert dut.bidir_PAD.value[8] == 1
+        assert dut.bidir_PAD.value[14] == (0 if ram_a else 1)
+        assert dut.bidir_PAD.value[15] == (1 if ram_a else 0)
+        assert dut.bidir_PAD.value[11] == 0
+
+select = None
+
+def check_selected(dut):
+    assert dut.bidir_PAD.value[8] == (0 if "FLASH" == select else 1)
+    assert dut.bidir_PAD.value[14] == (0 if "RAM A" == select else 1)
+    assert dut.bidir_PAD.value[15] == (0 if "RAM B" == select else 1)
+
+def is_selected(dut):
+    if "FLASH" == select: return dut.bidir_PAD.value[8] == 0
+    if "RAM A" == select: return dut.bidir_PAD.value[14] == 0
+    if "RAM B" == select: return dut.bidir_PAD.value[15] == 0
+    return False
+
+async def start_read(dut, addr, allow_interrupt=False):
+    global select
+
+    if addr is None:
+        select = "FLASH"
+    elif addr >= 0x1800000:
+        select = "RAM B"
+    elif addr >= 0x1000000:
+        select = "RAM A"
+    else:
+        select = "FLASH"
+
+    check_selected(dut)
+    assert dut.bidir_PAD.value[11] == 0
+
+    if select != "FLASH":
+        # Command
+        cmd = 0x0B
+        for i in range(2):
+            await ClockCycles(dut.clk_PAD, 1)
+            check_selected(dut)
+            assert dut.bidir_PAD.value[11] == 1
+            check_qspi_data_out(dut, (cmd & 0xF0) >> 4)
+            cmd <<= 4
+            await ClockCycles(dut.clk_PAD, 1)
+            check_selected(dut)
+            assert dut.bidir_PAD.value[11] == 0
+
+    # Address
+    for i in range(6):
+        await ClockCycles(dut.clk_PAD, 1)
+        if allow_interrupt and not is_selected(dut): return False
+        check_selected(dut)
+        assert dut.bidir_PAD.value[11] == 1
+        if addr is not None:
+            check_qspi_data_out(dut, (addr >> (20 - i * 4)) & 0xF)
+        await ClockCycles(dut.clk_PAD, 1)
+        if allow_interrupt and not is_selected(dut): return False
+        check_selected(dut)
+        assert dut.bidir_PAD.value[11] == 0
+
+    # Dummy
+    if select == "FLASH":
+        for i in range(2):
+            await ClockCycles(dut.clk_PAD, 1)
+            if allow_interrupt and not is_selected(dut): return False
+            check_selected(dut)
+            assert dut.bidir_PAD.value[11] == 1
+            check_qspi_data_out(dut, 0xA)
+            await ClockCycles(dut.clk_PAD, 1)
+            if allow_interrupt and not is_selected(dut): return False
+            check_selected(dut)
+            assert dut.bidir_PAD.value[11] == 0
+
+    for i in range(4):
+        await ClockCycles(dut.clk_PAD, 1)
+        if allow_interrupt and not is_selected(dut): return False
+        check_selected(dut)
+        assert dut.bidir_PAD.value[11] == 1
+        await ClockCycles(dut.clk_PAD, 1)
+        if allow_interrupt and not is_selected(dut): return False
+        check_selected(dut)
+        assert dut.bidir_PAD.value[11] == 0
+
+    return True
+
+nibble_shift_order = [4, 0, 12, 8, 20, 16, 28, 24]
+
+async def send_instr(dut, data, ok_to_exit=False, allow_long_delay=False):
+    instr_len = 8 if (data & 3) == 3 else 4
+    for i in range(instr_len):
+        set_qspi_data(dut, (data >> (nibble_shift_order[i])) & 0xF)
+        await ClockCycles(dut.clk_PAD, 1)
+        for _ in range(400 if allow_long_delay else 20):
+            if ok_to_exit and not is_selected(dut):
+                return
+            check_selected(dut)
+            if dut.bidir_PAD.value[11] == 0:
+                await ClockCycles(dut.clk_PAD, 1)
+            else:
+                break
+        assert dut.bidir_PAD.value[11] == 1
+        await ClockCycles(dut.clk_PAD, 1)
+        assert dut.bidir_PAD.value[11] == 0
+        if i != instr_len - 1:
+            if ok_to_exit and not is_selected(dut):
+                return
+            check_selected(dut)
 
 @cocotb.test()
 async def test_start(dut):
@@ -81,12 +315,39 @@ async def test_start(dut):
 
     logger.info("Running the test...")
 
-    assert dut.bidir_PAD.value[7:0] == "ZZZZZZZZ"
-    assert dut.bidir_PAD.value[15:8] == "11ZZ0ZZ1"
-    assert dut.bidir_PAD.value[23:16] == "X1000011"
+    #assert dut.bidir_PAD.value[15:8] == "11ZZ0ZZ1"
+    assert dut.bidir_PAD.value[23:16] == "01000011"
+    assert dut.bidir_PAD.value[26:24] == "110"
 
-    # Wait for some time...
-    await ClockCycles(dut.clk_PAD, 10)
+    await ClockCycles(dut.clk_PAD, 2)
+
+    # Expect flash and RAM init
+    await setup_flash(dut)
+    await ClockCycles(dut.clk_PAD, 2)
+    await setup_ram(dut, True)
+    await ClockCycles(dut.clk_PAD, 2)
+    await setup_ram(dut, False)
+    await ClockCycles(dut.clk_PAD, 3)
+
+    # Read starts at address 0
+    await start_read(dut, 0)
+
+    # Set up GPIO
+    await send_instr(dut, 0x0ff00093)
+    await send_instr(dut, 0x00122623)
+    await send_instr(dut, 0x00100093)
+    for j in range(8):
+        await send_instr(dut, 0x06122023 + 0x200 * j)
+
+    # Test GPIO
+    for i in range(40):
+        gpio_out = random.randint(0, 255)
+        await send_instr(dut, 0x00000093 + gpio_out * 0x100000)
+        await send_instr(dut, 0x04122023)
+        for j in range(4):
+            await send_instr(dut, 0x00000013) # NOP
+        for j in range(8):
+            assert dut.bidir_PAD.value[j+16] == (1 if (gpio_out >> j) & 1 else 0)
 
     logger.info("Done!")
 
@@ -186,6 +447,7 @@ def chip_top_runner():
 
         defines.update({"SIM": True})
 
+    includes.append(src_path)
     sources += [
         # IO pad models
         Path(pdk_root) / pdk / "libs.ref/gf180mcu_fd_io/verilog/gf180mcu_fd_io.v",
@@ -197,6 +459,9 @@ def chip_top_runner():
         # Custom IP
         proj_path / "../ip/gf180mcu_ws_ip__id/vh/gf180mcu_ws_ip__id.v",
         proj_path / "../ip/gf180mcu_ws_ip__logo/vh/gf180mcu_ws_ip__logo.v",
+
+        # Testbench
+        "tb_top.v"
     ]
 
     build_args = []
