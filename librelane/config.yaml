@@ -141,18 +141,95 @@ GRT_ALLOW_CONGESTION: true
 DRT_ANTENNA_REPAIR_ITERS: 10
 DRT_ANTENNA_MARGIN: 10 # %
 
+LIB:
+  "*_tt_025C_5v00":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__tt_025C_5v00.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__tt_025C_5v00.lib
+
+  "*_ff_n40C_5v50":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ff_n40C_5v50.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ff_n40C_5v50.lib
+
+  "*_ss_125C_4v50":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_4v50.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ss_125C_4v50.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ss_125C_4v50.lib
+
+  "*_tt_025C_3v30":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_3v30.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__tt_025C_3v30.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__tt_025C_5v00.lib
+
+  "*_ss_n40C_3v00":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_n40C_3v00.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ss_125C_2v97.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ss_125C_4v50.lib
+
+  "*_ss_125C_3v00":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_3v00.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ss_125C_2v97.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ss_125C_4v50.lib
+
+  "*_ff_n40C_3v60":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_3v60.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ff_n40C_3v63.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ff_n40C_5v50.lib
+
+  "*_ff_125C_3v60":
+    - pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_125C_3v60.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ff_125C_3v63.lib
+    - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ff_n40C_5v50.lib
+
 # Setup margin - these tweaks might not be necessary with 5V?
 PL_RESIZER_SETUP_SLACK_MARGIN: 4.0
 GRT_RESIZER_SETUP_SLACK_MARGIN: 3.5
 RSZ_CORNERS:
-- "nom_tt_025C_5v00"
-- "nom_ff_n40C_5v50"
-- "min_tt_025C_5v00"
-- "min_ff_n40C_5v50"
-- "max_tt_025C_5v00"
-- "max_ff_n40C_5v50"
+- nom_tt_025C_5v00
+- nom_ff_n40C_5v50
+- min_tt_025C_5v00
+- min_ff_n40C_5v50
+- max_tt_025C_5v00
+- max_ff_n40C_5v50
+- nom_tt_025C_3v30
+- nom_ff_n40C_3v60
+- min_tt_025C_3v30
+- min_ff_n40C_3v60
+- max_tt_025C_3v30
+- max_ff_n40C_3v60
+
+STA_CORNERS:
+  - nom_tt_025C_5v00
+  - nom_ss_125C_4v50
+  - nom_ff_n40C_5v50
+  - min_tt_025C_5v00
+  - min_ss_125C_4v50
+  - min_ff_n40C_5v50
+  - max_tt_025C_5v00
+  - max_ss_125C_4v50
+  - max_ff_n40C_5v50
+  - nom_tt_025C_3v30
+  - nom_ss_n40C_3v00
+  - nom_ss_125C_3v00
+  - nom_ff_n40C_3v60
+  - nom_ff_125C_3v60
+  - min_tt_025C_3v30
+  - min_ss_n40C_3v00
+  - min_ss_125C_3v00
+  - min_ff_n40C_3v60
+  - min_ff_125C_3v60
+  - max_tt_025C_3v30
+  - max_ss_n40C_3v00
+  - max_ss_125C_3v00
+  - max_ff_n40C_3v60
+  - max_ff_125C_3v60
+
+DEFAULT_CORNER: nom_tt_025C_3v30
 
 MAX_TRANSITION_CONSTRAINT: 2
+
+SYNTH_AUTONAME: True
 
 # PDN - Straps
 PDN_VWIDTH: 5
@@ -270,6 +347,17 @@ MACROS:
         - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ff_n40C_5v50.lib
       "*_ss_125C_4v50":
         - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ss_125C_4v50.lib
+      # 3.3V
+      "*_tt_025C_3v30":
+        - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__tt_025C_3v30.lib
+      "*_ss_n40C_3v00":
+        - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ss_n40C_3v00.lib
+      "*_ss_125C_3v00":
+        - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ss_125C_3v00.lib
+      "*_ff_n40C_3v60":
+        - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ff_n40C_3v60.lib
+      "*_ff_125C_3v60":
+        - pdk_dir::libs.ref/gf180mcu_fd_ip_sram/lib/gf180mcu_fd_ip_sram__sram512x8m8wm1__ff_125C_3v60.lib
     instances:
       # Make sure to specify the SRAMs in pdn_cfg.tcl
       i_chip_core.tt.i_tinyqv.cpu.i_scratch.i_sram:
