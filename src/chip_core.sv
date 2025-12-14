@@ -38,64 +38,29 @@ module chip_core #(
     assign input_pu = '0;
     assign input_pd = '0;
 
-    // Set the bidir as output
-    assign bidir_oe = '1;
+    // Set the bidir as the TT inputs, bidirs, outputs
+    assign bidir_oe[7:0] = '0;
+    assign bidir_oe[23:16] = '1;
+    assign bidir_oe[NUM_BIDIR_PADS-1:24] = '1;
     assign bidir_cs = '0;
     assign bidir_sl = '0;
     assign bidir_ie = ~bidir_oe;
     assign bidir_pu = '0;
     assign bidir_pd = '0;
-    
-    logic _unused;
-    assign _unused = &bidir_in;
 
-    logic [NUM_BIDIR_PADS-1:0] count;
-
-    always_ff @(posedge clk) begin
-        if (!rst_n) begin
-            count <= '0;
-        end else begin
-            if (&input_in) begin
-                count <= count + 1;
-            end
-        end
-    end
-
-    logic [7:0] sram_0_out;
-
-    gf180mcu_fd_ip_sram__sram512x8m8wm1 sram_0 (
-        `ifdef USE_POWER_PINS
-        .VDD  (VDD),
-        .VSS  (VSS),
-        `endif
-
-        .CLK  (clk),
-        .CEN  (1'b1),
-        .GWEN (1'b0),
-        .WEN  (8'b0),
-        .A    ('0),
-        .D    ('0),
-        .Q    (sram_0_out)
+    tt_um_MichaelBell_tinyQV tt(
+        .ui_in(bidir_in[7:0]),
+        .uo_out(bidir_out[23:16]),
+        .uio_in(bidir_oe[15:8] ? bidir_out[15:8] : bidir_in[15:8]),
+        .uio_out(bidir_out[15:8]),
+        .uio_oe(bidir_oe[15:8]),
+        .ena(1'b1),
+        .clk(clk),
+        .rst_n(rst_n)
     );
 
-    logic [7:0] sram_1_out;
-
-    gf180mcu_fd_ip_sram__sram512x8m8wm1 sram_1 (
-        `ifdef USE_POWER_PINS
-        .VDD  (VDD),
-        .VSS  (VSS),
-        `endif
-
-        .CLK  (clk),
-        .CEN  (1'b1),
-        .GWEN (1'b0),
-        .WEN  (8'b0),
-        .A    ('0),
-        .D    ('0),
-        .Q    (sram_1_out)
-    );
-
-    assign bidir_out = count ^ {24'd0, sram_0_out, sram_1_out};
+    assign bidir_out[7:0] = '0;
+    assign bidir_out[NUM_BIDIR_PADS-1:24] = '0;
 
 endmodule
 
