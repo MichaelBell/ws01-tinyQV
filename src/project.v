@@ -13,7 +13,10 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,
-    input  wire       rst_n
+    input  wire       rst_n,
+    input  wire       uart_rx,
+    output wire       uart_tx,
+    output wire       uart_rts
 );
 
     // Address to peripheral map
@@ -214,6 +217,10 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
 
         .audio(audio),
         .audio_select(audio_select),
+
+        .uart_rx(uart_rx),
+        .uart_tx(uart_tx),
+        .uart_rts(uart_rts),
 
         .addr_in(addr[10:0]),
         .data_in(data_to_write),

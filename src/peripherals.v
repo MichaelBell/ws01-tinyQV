@@ -26,6 +26,10 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
     output reg    audio,        // An extra output that can be selected on to uio[7]
     output        audio_select, // Whether audio should be selected on uio[7] (resets to 0).
 
+    output        uart_tx,
+    output        uart_rts,
+    input         uart_rx,
+
     input [10:0]  addr_in,
     input [31:0]  data_in,      // Data in to the peripheral, bottom 8, 16 or all 32 bits are valid on write.
 
@@ -212,6 +216,7 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
         .rst_n(rst_n_rebuf),
 
         .ui_in(ui_in),
+        .uart_rx(uart_rx),
         .uo_out(uo_out_from_user_peri[PERI_UART]),
 
         .address(addr_in[5:0]),
@@ -225,6 +230,9 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
 
         .user_interrupt(user_interrupts[PERI_UART+1:PERI_UART])
     );
+
+    assign uart_tx = uo_out_from_user_peri[PERI_UART][0];
+    assign uart_rts = uo_out_from_user_peri[PERI_UART][1];
 
     // Peripheral 3 is a full peripheral but with no interrupt
     tqvp_game_pmod i_user_peri03(

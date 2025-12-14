@@ -15,6 +15,7 @@ module tqvp_uart_wrapper #(
 
     input  [7:0]  ui_in,        // The input PMOD, always available.  Note that ui_in[7] is normally used for UART RX.
                                 // The inputs are synchronized to the clock, note this will introduce 2 cycles of delay on the inputs.
+    input         uart_rx,
 
     output [7:0]  uo_out,       // The output PMOD.  Each wire is only connected if this peripheral is selected.
                                 // Note that uo_out[0] is normally used for UART TX.
@@ -45,14 +46,14 @@ module tqvp_uart_wrapper #(
         end
     end
 
-    // A read/write 1-bit register to choose alternative ui_in for rxd
-    reg rxd_select;
+    // A read/write 2-bit register to choose alternative ui_in for rxd
+    reg [1:0] rxd_select;
     always @(posedge clk) begin
         if (!rst_n) begin
             rxd_select <= 0;
         end else begin
             if (address == 6'hc) begin
-                if (data_write_n != 2'b11) rxd_select <= data_in[0];
+                if (data_write_n != 2'b11) rxd_select <= data_in[1:0];
             end
         end
     end
@@ -79,7 +80,8 @@ module tqvp_uart_wrapper #(
 
     wire uart_rx_valid;
     wire [7:0] uart_rx_data;
-    wire uart_rxd = rxd_select ? ui_in[3] : ui_in[7];
+    wire uart_rxd = rxd_select[1] ? uart_rx :
+                    rxd_select[0] ? ui_in[3] : ui_in[7];
     wire uart_rts;
 
     tqvp_uart_rx i_uart_rx(

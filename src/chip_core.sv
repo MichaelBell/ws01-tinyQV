@@ -40,13 +40,19 @@ module chip_core #(
 
     // Set the bidir as the TT inputs, bidirs, outputs
     assign bidir_oe[7:0] = '0;
-    assign bidir_oe[24:16] = '1;
-    assign bidir_oe[NUM_BIDIR_PADS-1:25] = '1;
+    assign bidir_out[7:0] = '0;
+
+    assign bidir_oe[26:16] = '1;
     assign bidir_cs = '0;
     assign bidir_sl = '0;
-    assign bidir_ie = ~bidir_oe;
+    assign bidir_ie[26:0] = ~bidir_oe[26:0];
     assign bidir_pu = '0;
-    assign bidir_pd = '0;
+    assign bidir_pd[26:0] = '0;
+
+    assign bidir_ie[NUM_BIDIR_PADS-1:27] = '0;
+    assign bidir_oe[NUM_BIDIR_PADS-1:27] = '0;
+    assign bidir_pd[NUM_BIDIR_PADS-1:27] = '1;
+    assign bidir_out[NUM_BIDIR_PADS-1:27] = '0;
 
     wire [15:8] uio_in;
     generate
@@ -63,11 +69,11 @@ module chip_core #(
         .uio_oe(bidir_oe[15:8]),
         .ena(1'b1),
         .clk(clk),
-        .rst_n(rst_n)
+        .rst_n(rst_n),
+        .uart_rx(input_in[0]),
+        .uart_tx(bidir_out[25]),
+        .uart_rts(bidir_out[26])
     );
-
-    assign bidir_out[7:0] = '0;
-    assign bidir_out[NUM_BIDIR_PADS-1:25] = '0;
 
 endmodule
 

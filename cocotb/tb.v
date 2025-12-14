@@ -56,7 +56,7 @@ module tb #(
   wire spi_sck = uo_out[5];
   wire spi_mosi = uo_out[3];
   wire spi_dc = uo_out[2];
-  
+
   wire audio = uo_out[8];
 
   wire mhz_clk = ui_in_base[3];
@@ -64,12 +64,14 @@ module tb #(
   wire game_clk = ui_in_base[5];
   wire game_data = ui_in_base[6];
 
-  wire uart_tx = uo_out[0];
-  wire uart_rts = uo_out[1];
+  wire uart_tx = bidir_out[25];
+  wire uart_rts = bidir_out[26];
   wire debug_uart_tx = uo_out[6];
-  wire uart_rx = ui_in_base[7];
+  reg uart_rx;
   assign ui_in = {uart_rx, game_data, game_clk, game_latch, mhz_clk, spi_miso, ui_in_base[1:0]};
   assign bidir_in[15:0] = {2'b00, rst_n ? qspi_data_in[3:2] : {1'b0, latency_cfg[2]}, 1'b0, rst_n ? qspi_data_in[1:0] : latency_cfg[1:0], 1'b0, ui_in};
+
+  assign input_in = {3'b000, uart_rx};
 
 `ifdef USE_POWER_PINS
   wire VPWR = 1'b1;
