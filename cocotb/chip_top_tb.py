@@ -27,19 +27,33 @@ async def enable_power(dut):
     dut.VDD.value = 1
     dut.VSS.value = 0
 
-async def start_clock(clock, freq=50):
+async def start_clock(clock, freq=25):
     """Start the clock @ freq MHz"""
     c = Clock(clock, 1 / freq * 1000, "ns")
     cocotb.start_soon(c.start())
 
 
-async def reset(reset, active_low=True, time_ns=1000):
+async def reset(clk, reset, dut, active_low=True):
     """Reset dut"""
+    await Timer(200, "ns")
+
     cocotb.log.info("Reset asserted...")
 
     reset.value = not active_low
-    await Timer(time_ns, "ns")
+    await Timer(200, "ns")
+
+    dut.bidir_PAD.value[12] = 0
+    dut.bidir_PAD.value[10] = 0
+    dut.bidir_PAD.value[9] = 1
+    await Timer(800, "ns")
+    await RisingEdge(clk)
+
     reset.value = active_low
+    await FallingEdge(clk)
+
+    dut.bidir_PAD.value[12] = 'Z'
+    dut.bidir_PAD.value[10] = "Z"
+    dut.bidir_PAD.value[9] = "Z"
 
     cocotb.log.info("Reset deasserted.")
 
@@ -50,11 +64,11 @@ async def start_up(dut):
     if gl:
         await enable_power(dut)
     await start_clock(dut.clk_PAD)
-    await reset(dut.rst_n_PAD)
+    await reset(dut.clk_PAD, dut.rst_n_PAD, dut)
 
 
 @cocotb.test()
-async def test_counter(dut):
+async def test_start(dut):
     """Run the counter test"""
 
     # Create a logger for this testbench
@@ -67,17 +81,12 @@ async def test_counter(dut):
 
     logger.info("Running the test...")
 
+    assert dut.bidir_PAD.value[7:0] == "ZZZZZZZZ"
+    assert dut.bidir_PAD.value[15:8] == "11ZZ0ZZ1"
+    assert dut.bidir_PAD.value[23:16] == "X1000011"
+
     # Wait for some time...
     await ClockCycles(dut.clk_PAD, 10)
-
-    # Start the counter by setting all inputs to 1
-    dut.input_PAD.value = -1
-
-    # Wait for a number of clock cycles
-    await ClockCycles(dut.clk_PAD, 100)
-
-    # Check the end result of the counter
-    assert dut.bidir_PAD.value == 100 - 1
 
     logger.info("Done!")
 
@@ -98,10 +107,70 @@ def chip_top_runner():
         # We use the powered netlist
         sources.append(proj_path / f"../final/pnl/{hdl_toplevel}.pnl.v")
 
-        defines = {"FUNCTIONAL": True, "USE_POWER_PINS": True}
+        defines.update({"FUNCTIONAL": True, "USE_POWER_PINS": True})
     else:
-        sources.append(proj_path / "../src/chip_top.sv")
-        sources.append(proj_path / "../src/chip_core.sv")
+        src_path = proj_path / "../src/"
+        sources.append(src_path / "chip_top.sv")
+        sources.append(src_path / "chip_core.sv")
+        sources.append(src_path / "project.v")
+        sources.append(src_path / "tinyQV/cpu/tinyqv.v")
+        sources.append(src_path / "tinyQV/cpu/alu.v")
+        sources.append(src_path / "tinyQV/cpu/buffer.v")
+        sources.append(src_path / "tinyQV/cpu/core.v")
+        sources.append(src_path / "tinyQV/cpu/counter.v")
+        sources.append(src_path / "tinyQV/cpu/cpu.v")
+        sources.append(src_path / "tinyQV/cpu/decode.v")
+        sources.append(src_path / "tinyQV/cpu/mem_ctrl.v")
+        sources.append(src_path / "tinyQV/cpu/qspi_ctrl.v")
+        sources.append(src_path / "tinyQV/cpu/qspi_setup.v")
+        sources.append(src_path / "tinyQV/cpu/register.v")
+        sources.append(src_path / "tinyQV/cpu/latch_reg.v")
+        sources.append(src_path / "tinyQV/cpu/time.v")
+        sources.append(src_path / "tinyQV/cpu/internal_ram.v")
+        sources.append(src_path / "tinyQV/peri/uart/uart_tx.v")
+        sources.append(src_path / "peripherals.v")
+        sources.append(src_path / "peri_byte_empty.v")
+        sources.append(src_path / "peri_full_empty.v")
+        sources.append(src_path / "user_peripherals/uart/peri_uart.v")
+        sources.append(src_path / "user_peripherals/uart/uart_rx.v")
+        sources.append(src_path / "user_peripherals/uart/uart_tx.v")
+        sources.append(src_path / "user_peripherals/spi.v")
+        sources.append(src_path / "user_peripherals/game_pmod.v")
+        sources.append(src_path / "user_peripherals/matt_pwm/matt_pwm.v")
+        sources.append(src_path / "user_peripherals/matt_pwm/pwm_strobe_gen.v")
+        sources.append(src_path / "user_peripherals/matt_pwm/pwm.v")
+        sources.append(src_path / "user_peripherals/tqvp_laurie_dwarf_line_table_accelerator.sv")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/peripheral.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/carrier.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/countdown_timer.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/delay_1.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/delay_2.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/simple_falling_edge_detector.v")
+        sources.append(src_path / "user_peripherals/pulse_transmitter/simple_rising_edge_detector.v")
+        sources.append(src_path / "user_peripherals/ubcd/ascii.v")
+        sources.append(src_path / "user_peripherals/ubcd/cistercian.v")
+        sources.append(src_path / "user_peripherals/ubcd/kaktovik.v")
+        sources.append(src_path / "user_peripherals/ubcd/peripheral.v")
+        sources.append(src_path / "user_peripherals/ubcd/ubcd.v")
+        sources.append(src_path / "user_peripherals/CORDIC/tqvp_CORDIC.v")
+        sources.append(src_path / "user_peripherals/CORDIC/CORDIC_angles_ROM_comb.v")
+        sources.append(src_path / "user_peripherals/CORDIC/CORDIC_atanh_ROM_comb.v")
+        sources.append(src_path / "user_peripherals/CORDIC/CORDIC_iteration.v")
+        sources.append(src_path / "user_peripherals/CORDIC/CORDIC.v")
+        sources.append(src_path / "user_peripherals/CORDIC/defines.v")
+        sources.append(src_path / "user_peripherals/pwl_synth/pwl_synth.sv")
+        sources.append(src_path / "user_peripherals/pwl_synth/pwl_synth_memory.sv")
+        sources.append(src_path / "user_peripherals/AY8913/attenuation.v")
+        sources.append(src_path / "user_peripherals/AY8913/envelope.v")
+        sources.append(src_path / "user_peripherals/AY8913/noise.v")
+        sources.append(src_path / "user_peripherals/AY8913/pwm.v")
+        sources.append(src_path / "user_peripherals/AY8913/signal_edge.v")
+        sources.append(src_path / "user_peripherals/AY8913/tone.v")
+        sources.append(src_path / "user_peripherals/AY8913/ay8913.v")
+        sources.append(src_path / "user_peripherals/AY8913/peripheral.v")
+        includes.append(src_path / "user_peripherals/pwl_synth/")
+
+        defines.update({"SIM": True})
 
     sources += [
         # IO pad models
