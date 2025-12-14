@@ -34,30 +34,64 @@ module chip_core #(
 
     // See here for usage: https://gf180mcu-pdk.readthedocs.io/en/latest/IPs/IO/gf180mcu_fd_io/digital.html
     
-    // Disable pull-up and pull-down for input
-    assign input_pu = '0;
-    assign input_pd = '0;
+    // Pull up for prog_n
+    assign input_pu[1:0] = 2'b10;
+    assign input_pd[1:0] = 2'b00;
+    assign input_pu[NUM_INPUT_PADS-1:2] = '0;
+    assign input_pd[NUM_INPUT_PADS-1:2] = '0;
 
     // Set the bidir as the TT inputs, bidirs, outputs
     assign bidir_oe[7:0] = '0;
     assign bidir_out[7:0] = '0;
 
-    assign bidir_oe[26:16] = '1;
+    assign bidir_oe[29:16] = '1;
+    assign bidir_oe[32:30] = '0;
+    assign bidir_out[32:30] = '0;
+
     assign bidir_cs = '0;
     assign bidir_sl = '0;
-    assign bidir_ie[26:0] = ~bidir_oe[26:0];
-    assign bidir_pu = '0;
-    assign bidir_pd[26:0] = '0;
+    assign bidir_ie[32:0] = ~bidir_oe[32:0];
+    assign bidir_pu[7:0] = '0;
+    assign bidir_pu[32:16] = '0;
+    assign bidir_pd[7:0] = '0;
+    assign bidir_pd[32:16] = '0;
 
-    assign bidir_ie[NUM_BIDIR_PADS-1:27] = '0;
-    assign bidir_oe[NUM_BIDIR_PADS-1:27] = '0;
-    assign bidir_pd[NUM_BIDIR_PADS-1:27] = '1;
-    assign bidir_out[NUM_BIDIR_PADS-1:27] = '0;
+    // Set the pulls on the QSPI data to configure sensible default latency, and pull up chip selects
+    assign bidir_pu[15:8] = prog_n ? 8'b11000011 : 8'b11110011;
+    assign bidir_pd[15:8] = prog_n ? 8'b00110100 : 8'b00000100;
 
-    wire [15:8] uio_in;
+    wire [7:0] uio_in;
+    wire [7:0] uio_oe;
+    wire [7:0] uio_out;
+    wire prog_n = input_in[1];
+    assign bidir_out[8] = prog_n ? uio_out[0] : bidir_in[30];  // Flash CS
+    assign bidir_oe[8]  = prog_n ? uio_oe[0]  : '1;
+    assign bidir_out[9] = prog_n ? uio_out[1] : bidir_in[31];  // Flash MOSI
+    assign bidir_oe[9]  = prog_n ? uio_oe[1]  : '1;
+    assign bidir_out[10] = prog_n ? uio_out[2] : '0;           // Flash MISO
+    assign bidir_oe[10]  = prog_n ? uio_oe[2]  : '0;
+    assign bidir_out[11] = prog_n ? uio_out[3] : bidir_in[32]; // Flash SCK
+    assign bidir_oe[11]  = prog_n ? uio_oe[3]  : '1;
+    assign bidir_out[12] = uio_out[4];
+    assign bidir_oe[12] = prog_n ? uio_oe[4] : '0;
+    assign bidir_out[13] = uio_out[5];
+    assign bidir_oe[13] = prog_n ? uio_oe[5] : '0;
+    assign bidir_out[14] = prog_n ? uio_out[6] : '1;           // RAM A CS
+    assign bidir_oe[14] = prog_n ? uio_oe[6] : '0;
+    assign bidir_out[15] = prog_n ? uio_out[7] : '1;           // RAM B CS
+    assign bidir_oe[15] = prog_n ? uio_oe[7] : '0;
+
+    assign bidir_out[29] = prog_n ? 1'b1 : bidir_in[10];
+
+    assign bidir_ie[NUM_BIDIR_PADS-1:33] = '0;
+    assign bidir_oe[NUM_BIDIR_PADS-1:33] = '0;
+    assign bidir_pu[NUM_BIDIR_PADS-1:33] = '0;
+    assign bidir_pd[NUM_BIDIR_PADS-1:33] = '1;
+    assign bidir_out[NUM_BIDIR_PADS-1:33] = '0;
+
     generate
-    for (genvar i=8; i<16; i++) begin : bidir_inputs
-        assign uio_in[i] = bidir_oe[i] ? bidir_out[i] : bidir_in[i];
+    for (genvar i=0; i<8; i++) begin : bidir_inputs
+        assign uio_in[i] = uio_oe[i] ? uio_out[i] : bidir_in[i+8];
     end
     endgenerate
 
@@ -65,14 +99,16 @@ module chip_core #(
         .ui_in(bidir_in[7:0]),
         .uo_out(bidir_out[24:16]),
         .uio_in(uio_in),
-        .uio_out(bidir_out[15:8]),
-        .uio_oe(bidir_oe[15:8]),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
         .ena(1'b1),
         .clk(clk),
         .rst_n(rst_n),
         .uart_rx(input_in[0]),
         .uart_tx(bidir_out[25]),
-        .uart_rts(bidir_out[26])
+        .uart_rts(bidir_out[26]),
+        .debug_uart_txd(bidir_out[27]),
+        .debug_signal(bidir_out[28])
     );
 
 endmodule

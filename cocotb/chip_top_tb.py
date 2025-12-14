@@ -23,6 +23,7 @@ hdl_toplevel = "tb_top"
 async def set_defaults(dut):
     dut.uart_rx.value = 1
     dut.ui_in.value = 0
+    dut.prog_n.value = 1
 
 async def enable_power(dut):
     dut.VDD.value = 1
@@ -71,7 +72,7 @@ def check_qspi_data_out(dut, val):
 
 def check_spi_data_out(dut, val):
     assert dut.bidir_PAD.value[9] == (1 if val & 1 else 0)
-    assert dut.bidir_PAD.value[10] == 'Z'
+    assert dut.bidir_PAD.value[10] == 0 # Pulled down
 
 def set_qspi_data(dut, val):
     dut.qspi_data.value = val
@@ -303,7 +304,7 @@ async def send_instr(dut, data, ok_to_exit=False, allow_long_delay=False):
 
 @cocotb.test()
 async def test_start(dut):
-    """Run the counter test"""
+    """Run a simple GPIO test"""
 
     # Create a logger for this testbench
     logger = logging.getLogger("my_testbench")
@@ -316,7 +317,7 @@ async def test_start(dut):
     logger.info("Running the test...")
 
     #assert dut.bidir_PAD.value[15:8] == "11ZZ0ZZ1"
-    assert dut.bidir_PAD.value[23:16] == "01000011"
+    assert dut.bidir_PAD.value[23:16] == "00000011"
     assert dut.bidir_PAD.value[26:24] == "110"
 
     await ClockCycles(dut.clk_PAD, 2)
@@ -351,6 +352,35 @@ async def test_start(dut):
 
     logger.info("Done!")
 
+#@cocotb.test()
+async def test_prog(dut):
+    """Check prog works"""
+
+    # Create a logger for this testbench
+    logger = logging.getLogger("my_testbench")
+    logger.info("Startup sequence...")
+
+    await set_defaults(dut)
+    if gl:
+        await enable_power(dut)
+    await start_clock(dut.clk_PAD)
+    dut.rst_n_PAD.value = 1
+    await Timer(200, "ns")
+
+    dut.prog_n.value = 0
+
+    for i in range(16):
+        dut.prog_cs.value = 1 if (i & 1) else 0
+        dut.prog_sck.value = 1 if (i & 2) else 0
+        dut.prog_mosi.value = 1 if (i & 4) else 0
+        #dut.qspi_data.value[1] = 1 if (i & 8) else 0
+
+        await Timer(1, "ns")
+
+        assert dut.uio.value[0] == 1 if (i & 1) else 0
+        assert dut.uio.value[3] == 1 if (i & 2) else 0
+        assert dut.uio.value[1] == 1 if (i & 4) else 0
+        assert dut.prog_miso.value == 1 if (i & 8) else 0
 
 def chip_top_runner():
 

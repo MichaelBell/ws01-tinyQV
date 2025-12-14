@@ -359,7 +359,7 @@ async def test_debug_reg(dut):
     await send_instr(dut, InstructionADDI(i+8, x0 if i == 0 else (i+7), 0x102*i).encode())
     await start_nops(dut)
     for i in range(24):
-        if dut.uo_out.value[7] == 1:
+        if dut.debug_signal.value == 1:
             break
         await ClockCycles(dut.clk, 1)
     else:

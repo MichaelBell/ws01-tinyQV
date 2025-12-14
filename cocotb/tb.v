@@ -66,12 +66,13 @@ module tb #(
 
   wire uart_tx = bidir_out[25];
   wire uart_rts = bidir_out[26];
-  wire debug_uart_tx = uo_out[6];
+  wire debug_uart_tx = bidir_out[27];
+  wire debug_signal = bidir_out[28];
   reg uart_rx;
   assign ui_in = {uart_rx, game_data, game_clk, game_latch, mhz_clk, spi_miso, ui_in_base[1:0]};
   assign bidir_in[15:0] = {2'b00, rst_n ? qspi_data_in[3:2] : {1'b0, latency_cfg[2]}, 1'b0, rst_n ? qspi_data_in[1:0] : latency_cfg[1:0], 1'b0, ui_in};
 
-  assign input_in = {3'b000, uart_rx};
+  assign input_in = {3'b001, uart_rx};
 
 `ifdef USE_POWER_PINS
   wire VPWR = 1'b1;

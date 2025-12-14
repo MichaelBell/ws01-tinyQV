@@ -14,10 +14,16 @@ module tb_top #(
 );
 
     reg uart_rx;
+    reg prog_n;
     wire [3:0] input_PAD;
-    assign input_PAD = {3'b000, uart_rx};
+    assign input_PAD = {2'b00, prog_n, uart_rx};
     wire uart_tx;
     wire uart_rts;
+
+    reg prog_cs;
+    reg prog_sck;
+    reg prog_mosi;
+    wire prog_miso;
 
     reg [7:0] ui_in;
     wire [7:0] uio;
@@ -34,6 +40,8 @@ module tb_top #(
     assign audio = bidir_PAD[24];
     assign uart_tx = bidir_PAD[25];
     assign uart_rts = bidir_PAD[26];
+    assign prog_miso = bidir_PAD[29];
+    assign bidir_PAD[32:30] = {prog_sck, prog_mosi, prog_cs};
 
     reg clk_PAD;
     reg rst_n_PAD;

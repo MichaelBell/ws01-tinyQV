@@ -16,7 +16,9 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     input  wire       rst_n,
     input  wire       uart_rx,
     output wire       uart_tx,
-    output wire       uart_rts
+    output wire       uart_rts,
+    output wire       debug_uart_txd,
+    output wire       debug_signal
 );
 
     // Address to peripheral map
@@ -86,9 +88,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     wire       debug_stop_txn;
     wire [3:0] debug_rd;
 
-    wire       debug_uart_txd;
-    wire       debug_signal;
-    reg  [7:6] gpio_out_sel;
+    reg  [6:6] gpio_out_sel;
 
     reg [3:0] connect_peripheral;
 
@@ -209,7 +209,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     assign uo_out[4] = debug_register_data ? debug_rd_r[2] : peri_out[4];
     assign uo_out[5] = debug_register_data ? debug_rd_r[3] : peri_out[5];
     assign uo_out[6] = gpio_out_sel[6] ? peri_out[6] : debug_uart_txd;
-    assign uo_out[7] = gpio_out_sel[7] ? peri_out[7] : debug_signal;
+    assign uo_out[7] = peri_out[7];
 
     tinyQV_peripherals #(.CLOCK_MHZ(CLOCK_MHZ)) i_peripherals (
         .clk(clk),
@@ -253,7 +253,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     always @(*) begin
         case (connect_peripheral)
             PERI_ID:          data_from_read = "GF.2";
-            PERI_GPIO_OUT_SEL:data_from_read = {24'h0, gpio_out_sel, 6'h0};
+            PERI_GPIO_OUT_SEL:data_from_read = {25'h0, gpio_out_sel, 6'h0};
             PERI_DEBUG_UART_STATUS: data_from_read = {31'h0, debug_uart_tx_busy};
             PERI_TIME_LIMIT:  data_from_read = {25'h0, time_limit, 2'b11};
             PERI_USER:        data_from_read = peri_data_out;
@@ -266,11 +266,11 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     // GPIO Out
     always @(posedge clk) begin
         if (!rst_reg_n) begin
-            gpio_out_sel <= {!ui_in[0], 1'b0};
+            gpio_out_sel <= 1'b1;
             time_limit <= (CLOCK_MHZ / 4 - 1);
         end
         if (write_n != 2'b11) begin
-            if (connect_peripheral == PERI_GPIO_OUT_SEL) gpio_out_sel <= data_to_write[7:6];
+            if (connect_peripheral == PERI_GPIO_OUT_SEL) gpio_out_sel <= data_to_write[6:6];
             if (connect_peripheral == PERI_TIME_LIMIT) time_limit <= data_to_write[6:2];
         end
     end

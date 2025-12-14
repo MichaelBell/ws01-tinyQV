@@ -59,8 +59,8 @@ set spi_clk_setup_delay_value [expr $::env(CLOCK_PERIOD) * 0.18]
 set_output_delay -clock $clocks -max $spi_clk_setup_delay_value {bidir_PAD[11]}
 
 # Delays on user outputs
-set_output_delay -clock $clocks -min 3 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24] bidir_PAD[25] bidir_PAD[26]}
-set_output_delay -clock $clocks -max 1 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24] bidir_PAD[25] bidir_PAD[26]}
+set_output_delay -clock $clocks -min 3 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24] bidir_PAD[25] bidir_PAD[26] bidir_PAD[27] bidir_PAD[28] bidir_PAD[29]}
+set_output_delay -clock $clocks -max 1 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24] bidir_PAD[25] bidir_PAD[26] bidir_PAD[27] bidir_PAD[28] bidir_PAD[29]}
 
 # Input-only pads
 set clk_core_input_ports [get_ports { 
@@ -72,6 +72,13 @@ set_input_delay -max $input_setup_delay_value -clock $clocks $clk_core_input_por
 
 # Reset
 set_input_delay 2 -clock $clocks {rst_n_PAD}
+
+# Prog - basically ignore timing
+set_input_delay 2 -clock $clocks {input_PAD[1]}
+set_output_delay 2 -clock $clocks {bidir_PAD[29]}
+set_input_delay 2 -clock $clocks {bidir_PAD[30]}
+set_input_delay 2 -clock $clocks {bidir_PAD[31]}
+set_input_delay 2 -clock $clocks {bidir_PAD[32]}
 
 # Output load
 set cap_load [expr $::env(OUTPUT_CAP_LOAD) / 1000.0]
