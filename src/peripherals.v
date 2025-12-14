@@ -71,9 +71,9 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
 
     // Rebuffer reset on positive edge of clock.  This is fine providing peripherals
     // don't use async reset.
-    reg rst_n_rebuf;
+    (* keep *) reg rst_n_rebuf;
     /* verilator lint_off SYNCASYNCNET */
-    reg rst_n_rebuf_negedge;
+    (* keep *) reg rst_n_rebuf_negedge;
     /* verilator lint_on SYNCASYNCNET */
     always @(posedge clk) begin
         rst_n_rebuf <= rst_n;
@@ -344,7 +344,7 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
 
     tqvp_prism i_user_peri09 (
         .clk(clk),
-        .rst_n(rst_n_rebuf),
+        .rst_n(rst_n_rebuf_negedge),
 
         .ui_in(ui_in),
         .uo_out(uo_out_from_user_peri[9]),
@@ -363,7 +363,7 @@ module tinyQV_peripherals #(parameter CLOCK_MHZ=64) (
 
     tqvp_affinex i_user_peri10 (
         .clk(clk),
-        .rst_n(rst_n_rebuf),
+        .rst_n(rst_n_rebuf_negedge),
 
         .ui_in(ui_in),
         .uo_out(uo_out_from_user_peri[10]),

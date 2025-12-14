@@ -41,7 +41,7 @@ module chip_core #(
     // Set the bidir as the TT inputs, bidirs, outputs
     assign bidir_oe[7:0] = '0;
     assign bidir_oe[24:16] = '1;
-    assign bidir_oe[NUM_BIDIR_PADS-1:24] = '1;
+    assign bidir_oe[NUM_BIDIR_PADS-1:25] = '1;
     assign bidir_cs = '0;
     assign bidir_sl = '0;
     assign bidir_ie = ~bidir_oe;

@@ -88,8 +88,11 @@ puts "\[INFO] Setting timing derate to: $::env(TIME_DERATING_CONSTRAINT)%"
 set_timing_derate -early [expr 1-[expr $::env(TIME_DERATING_CONSTRAINT) / 100]]
 set_timing_derate -late [expr 1+[expr $::env(TIME_DERATING_CONSTRAINT) / 100]]
 
+set rst_pins {i_chip_core.tt.i_peripherals.rst_n_rebuf_negedge_gf180mcu_fd_sc_mcu7t5v0__dffnq_1_Q/Q i_chip_core.tt.i_peripherals.rst_n_rebuf_gf180mcu_fd_sc_mcu7t5v0__dffq_1_Q/Q}
+
 if { [info exists ::env(OPENLANE_SDC_IDEAL_CLOCKS)] && $::env(OPENLANE_SDC_IDEAL_CLOCKS) } {
     unset_propagated_clock [all_clocks]
+    set_case_analysis 1 ${rst_pins}
 } else {
     set_propagated_clock [all_clocks]
 }
