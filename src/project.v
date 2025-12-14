@@ -113,9 +113,13 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     // Peripherals get synchronized ui_in.
     reg [7:0] ui_in_sync0;
     reg [7:0] ui_in_sync;
+    reg       uart_rx_sync0;
+    reg       uart_rx_sync;
     always @(posedge clk) begin
         ui_in_sync0 <= ui_in;
+        uart_rx_sync0 <= uart_rx;
         ui_in_sync <= ui_in_sync0;
+        uart_rx_sync <= uart_rx_sync0;
     end
 
     // Interrupt requests
@@ -218,7 +222,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
         .audio(audio),
         .audio_select(audio_select),
 
-        .uart_rx(uart_rx),
+        .uart_rx(uart_rx_sync),
         .uart_tx(uart_tx),
         .uart_rts(uart_rts),
 
