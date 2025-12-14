@@ -50,7 +50,7 @@ module chip_core #(
 
     wire [15:8] uio_in;
     generate
-    for (genvar i=8; i<15; i++) begin : bidir_inputs
+    for (genvar i=8; i<16; i++) begin : bidir_inputs
         assign uio_in[i] = bidir_oe[i] ? bidir_out[i] : bidir_in[i];
     end
     endgenerate
