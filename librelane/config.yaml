@@ -84,6 +84,19 @@ VERILOG_FILES:
 - dir::../src/user_peripherals/AY8913/tone.v
 - dir::../src/user_peripherals/AY8913/ay8913.v
 - dir::../src/user_peripherals/AY8913/peripheral.v
+- dir::../src/user_peripherals/vga_tester/peripheral.v
+- dir::../src/user_peripherals/prism/prism_periph.v
+- dir::../src/user_peripherals/prism/latch_shift_reg.v
+- dir::../src/user_peripherals/prism/latch_loader.v
+- dir::../src/user_peripherals/prism/prism.v
+- dir::../src/user_peripherals/prism/prism_sr_sit.v
+- dir::../src/user_peripherals/prism/prism_latch_sit.v
+- dir::../src/user_peripherals/prism/prism_latch_reg.v
+- dir::../src/user_peripherals/vga_gfx/peripheral.v
+- dir::../src/user_peripherals/vga_gfx/vga_timing.v
+- dir::../src/user_peripherals/vga_gfx/latch_config.v
+- dir::../src/user_peripherals/affinex/mul.sv
+- dir::../src/user_peripherals/affinex/tqvp_affinex.sv
 
 # Enable plugin for better SystemVerilog support
 # USE_SLANG: True
@@ -121,12 +134,25 @@ GRT_RESIZER_HOLD_SLACK_MARGIN: 0.3
 
 # Increase for more logic
 # on your die
-PL_TARGET_DENSITY_PCT: 35
+PL_TARGET_DENSITY_PCT: 45
 GRT_ALLOW_CONGESTION: true
 
 # Fix antenna violations after DRT
 DRT_ANTENNA_REPAIR_ITERS: 10
 DRT_ANTENNA_MARGIN: 10 # %
+
+# Setup margin - these tweaks might not be necessary with 5V?
+PL_RESIZER_SETUP_SLACK_MARGIN: 4.0
+GRT_RESIZER_SETUP_SLACK_MARGIN: 3.5
+RSZ_CORNERS:
+- "nom_tt_025C_5v00"
+- "nom_ff_n40C_5v50"
+- "min_tt_025C_5v00"
+- "min_ff_n40C_5v50"
+- "max_tt_025C_5v00"
+- "max_ff_n40C_5v50"
+
+MAX_TRANSITION_CONSTRAINT: 2
 
 # PDN - Straps
 PDN_VWIDTH: 5
@@ -268,7 +294,3 @@ LVS_FLATTEN_CELLS:
 MAGIC_EXT_ABSTRACT_CELLS:
 - gf180mcu_ws_ip__id
 - gf180mcu_ws_ip__logo
-
-# Save some time - remove for final verify
-#RUN_KLAYOUT_XOR: False
-#RUN_KLAYOUT_DRC: False

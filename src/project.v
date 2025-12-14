@@ -104,7 +104,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     wire [7:0] peri_out;
     wire [31:0] peri_data_out;
     wire        peri_data_ready;
-    wire [7:2] peri_interrupts;
+    wire [9:2] peri_interrupts;
 
     // Peripherals get synchronized ui_in.
     reg [7:0] ui_in_sync0;
@@ -115,7 +115,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     end
 
     // Interrupt requests
-    wire [7:0] interrupt_req = {peri_interrupts, ui_in_sync[1:0]};
+    wire [9:0] interrupt_req = {peri_interrupts, ui_in_sync[1:0]};
     // Register the reset on the negative edge of clock for safety.
     // This also allows the option of async reset in the design, which might be preferable in some cases
     always @(negedge clk) setup_rst_n <= rst_n;
