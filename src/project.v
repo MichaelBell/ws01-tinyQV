@@ -7,7 +7,7 @@
 
 module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
+    output wire [8:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path - only some bits used
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
@@ -39,6 +39,7 @@ module tt_um_MichaelBell_tinyQV #(parameter CLOCK_MHZ=24) (
     assign uio_out = {audio_select ? audio : qspi_ram_b_select, qspi_ram_a_select, qspi_data_out[3:2], 
                       qspi_clk_out, qspi_data_out[1:0], qspi_flash_select};
     assign uio_oe = rst_n ? {2'b11, qspi_data_oe[3:2], 1'b1, qspi_data_oe[1:0], 1'b1} : 8'h00;
+    assign uo_out[8] = audio;
 
     wire [3:0] qspi_data_in_ctrl;
     reg  [3:0] qspi_config;

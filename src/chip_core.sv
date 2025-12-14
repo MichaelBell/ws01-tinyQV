@@ -40,7 +40,7 @@ module chip_core #(
 
     // Set the bidir as the TT inputs, bidirs, outputs
     assign bidir_oe[7:0] = '0;
-    assign bidir_oe[23:16] = '1;
+    assign bidir_oe[24:16] = '1;
     assign bidir_oe[NUM_BIDIR_PADS-1:24] = '1;
     assign bidir_cs = '0;
     assign bidir_sl = '0;
@@ -48,10 +48,17 @@ module chip_core #(
     assign bidir_pu = '0;
     assign bidir_pd = '0;
 
+    wire [15:8] uio_in;
+    generate
+    for (genvar i=8; i<15; i++) begin : bidir_inputs
+        assign uio_in[i] = bidir_oe[i] ? bidir_out[i] : bidir_in[i];
+    end
+    endgenerate
+
     tt_um_MichaelBell_tinyQV tt(
         .ui_in(bidir_in[7:0]),
-        .uo_out(bidir_out[23:16]),
-        .uio_in(bidir_oe[15:8] ? bidir_out[15:8] : bidir_in[15:8]),
+        .uo_out(bidir_out[24:16]),
+        .uio_in(uio_in),
         .uio_out(bidir_out[15:8]),
         .uio_oe(bidir_oe[15:8]),
         .ena(1'b1),
@@ -60,7 +67,7 @@ module chip_core #(
     );
 
     assign bidir_out[7:0] = '0;
-    assign bidir_out[NUM_BIDIR_PADS-1:24] = '0;
+    assign bidir_out[NUM_BIDIR_PADS-1:25] = '0;
 
 endmodule
 

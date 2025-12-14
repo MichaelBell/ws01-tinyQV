@@ -66,6 +66,10 @@ librelane-padring: ## Only create the padring
 	PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 scripts/padring.py librelane/slots/slot_${SLOT}.yaml librelane/config.yaml
 .PHONY: librelane-padring
 
+sim-core: ## Run RTL simulation of core with cocotb
+	cd cocotb; PDK_ROOT=${PDK_ROOT} PDK=${PDK} SLOT=${SLOT} python3 chip_core_tb.py
+.PHONY: sim-core
+
 sim: ## Run RTL simulation with cocotb
 	cd cocotb; PDK_ROOT=${PDK_ROOT} PDK=${PDK} SLOT=${SLOT} python3 chip_top_tb.py
 .PHONY: sim
