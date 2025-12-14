@@ -359,6 +359,7 @@ def chip_top_runner():
     sources = []
     defines = {f"SLOT_{slot.upper()}": True}
     includes = [proj_path / "../src/"]
+    src_path = proj_path / "../src/"
 
     if gl:
         # SCL models
@@ -370,7 +371,6 @@ def chip_top_runner():
 
         defines.update({"FUNCTIONAL": True, "USE_POWER_PINS": True})
     else:
-        src_path = proj_path / "../src/"
         sources.append(src_path / "chip_top.sv")
         sources.append(src_path / "chip_core.sv")
         sources.append(src_path / "project.v")
