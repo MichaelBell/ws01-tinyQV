@@ -8,8 +8,8 @@ meta:
     #Checker.KLayoutDRC: null
 
     # Disable KLayout antenna check
-    #KLayout.Antenna: null
-    #Checker.KLayoutAntenna: null
+    KLayout.Antenna: null
+    Checker.KLayoutAntenna: null
 
     # Disable KLayout density check
     #KLayout.Density: null
@@ -365,8 +365,8 @@ MACROS:
     instances:
       # Make sure to specify the SRAMs in pdn_cfg.tcl
       i_chip_core.tt.i_tinyqv.cpu.i_scratch.i_sram:
-        location: [490, 500]
-        orientation: S
+        location: [490, 1400]
+        orientation: N
 
 # This is an alternative method compared to
 # specifying the power connections in the RTL
