@@ -50,6 +50,7 @@ jobs:
     strategy:
       matrix:
         slot: ${{fromJSON(needs.pre.outputs.matrix)}}
+      fail-fast: false
     steps:
       - name: Set slot
         run: echo "SLOT=${{ matrix.slot }}" >> $GITHUB_ENV
@@ -82,7 +83,6 @@ jobs:
         run: |
           make clone-pdk
       - name: Run RTL simulation
-        if: false
         run: |
           nix develop --command make sim
       - name: Implement the Chip

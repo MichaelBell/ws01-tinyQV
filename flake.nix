@@ -36,6 +36,15 @@
                 version = "8.3.581";
                 sha256 = "sha256-mv6ekJsaFx6m828NenIRa4ryZsR7YHB1vWKI+axgx8U=";
               };
+              iverilog = (prev.iverilog.override {
+                version = "12.0";
+                rev = null;
+                sha256 = "sha256-J9hedSmC6mFVcoDnXBtaTXigxrSCFa2AhhFd77ueo7I=";
+              }).overrideAttrs {
+                env = {
+                  NIX_CFLAGS_COMPILE = "-Wno-error=format-security";
+                };
+              };
             })
           ];
         }

@@ -270,5 +270,5 @@ MAGIC_EXT_ABSTRACT_CELLS:
 - gf180mcu_ws_ip__logo
 
 # Save some time - remove for final verify
-RUN_KLAYOUT_XOR: False
-RUN_KLAYOUT_DRC: False
+#RUN_KLAYOUT_XOR: False
+#RUN_KLAYOUT_DRC: False
