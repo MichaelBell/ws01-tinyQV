@@ -61,7 +61,7 @@ module gamepad_pmod_driver #(
       shift_reg <= {BIT_WIDTH{1'b1}};
       pmod_clk_prev <= 1'b0;
       pmod_latch_prev <= 1'b0;
-    end
+    end else
     begin
       pmod_clk_prev   <= pmod_clk;
       pmod_latch_prev <= pmod_latch;
