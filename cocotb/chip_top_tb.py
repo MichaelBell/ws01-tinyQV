@@ -25,10 +25,6 @@ async def set_defaults(dut):
     dut.ui_in.value = 0
     dut.prog_n.value = 1
 
-async def enable_power(dut):
-    dut.VDD.value = 1
-    dut.VSS.value = 0
-
 async def start_clock(clock, freq=25):
     """Start the clock @ freq MHz"""
     c = Clock(clock, 1 / freq * 1000, "ns")
@@ -59,8 +55,6 @@ async def reset(clk, reset, dut, active_low=True):
 async def start_up(dut):
     """Startup sequence"""
     await set_defaults(dut)
-    if gl:
-        await enable_power(dut)
     await start_clock(dut.clk_PAD)
     await reset(dut.clk_PAD, dut.rst_n_PAD, dut)
 
@@ -352,7 +346,7 @@ async def test_start(dut):
 
     logger.info("Done!")
 
-#@cocotb.test()
+@cocotb.test()
 async def test_prog(dut):
     """Check prog works"""
 
@@ -361,26 +355,25 @@ async def test_prog(dut):
     logger.info("Startup sequence...")
 
     await set_defaults(dut)
-    if gl:
-        await enable_power(dut)
     await start_clock(dut.clk_PAD)
-    dut.rst_n_PAD.value = 1
+    dut.rst_n_PAD.value = 0
+    dut.qspi_data.value = "ZZZZ"
     await Timer(200, "ns")
 
     dut.prog_n.value = 0
 
     for i in range(16):
-        dut.prog_cs.value = 1 if (i & 1) else 0
-        dut.prog_sck.value = 1 if (i & 2) else 0
-        dut.prog_mosi.value = 1 if (i & 4) else 0
-        #dut.qspi_data.value[1] = 1 if (i & 8) else 0
+        dut.prog_cs.value = (1 if (i & 1) else 0)
+        dut.prog_sck.value = (1 if (i & 2) else 0)
+        dut.prog_mosi.value = (1 if (i & 4) else 0)
+        dut.qspi_data.value = f"ZZ{1 if (i & 8) else 0}Z"
 
-        await Timer(1, "ns")
+        await Timer(10, "ns")
 
-        assert dut.uio.value[0] == 1 if (i & 1) else 0
-        assert dut.uio.value[3] == 1 if (i & 2) else 0
-        assert dut.uio.value[1] == 1 if (i & 4) else 0
-        assert dut.prog_miso.value == 1 if (i & 8) else 0
+        assert dut.bidir_PAD.value[8] == (1 if (i & 1) else 0)
+        assert dut.bidir_PAD.value[11] == (1 if (i & 2) else 0)
+        assert dut.bidir_PAD.value[9] == (1 if (i & 4) else 0)
+        assert dut.prog_miso.value == (1 if (i & 8) else 0)
 
 def chip_top_runner():
 
