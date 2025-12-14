@@ -40,11 +40,16 @@ module tb_top #(
 
     wire [3:0] analog_PAD;
 
+`ifdef USE_POWER_PINS
+  wire VPWR = 1'b1;
+  wire VGND = 1'b0;
+`endif
+
     chip_top uut (
-        `ifdef USE_POWER_PINS
-        .VDD(1'b1),
-        .VSS(1'b0),
-        `endif
+`ifdef USE_POWER_PINS
+        .VDD(VPWR),
+        .VSS(VGND),
+`endif
 
         .clk_PAD(clk_PAD),
         .rst_n_PAD(rst_n_PAD),

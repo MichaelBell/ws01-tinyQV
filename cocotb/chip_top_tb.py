@@ -367,7 +367,7 @@ def chip_top_runner():
         sources.append(Path(pdk_root) / pdk / "libs.ref" / scl / "verilog" / "primitives.v")
 
         # We use the powered netlist
-        sources.append(proj_path / f"../final/pnl/{hdl_toplevel}.pnl.v")
+        sources.append(proj_path / f"../final/pnl/chip_top.pnl.v")
 
         defines.update({"FUNCTIONAL": True, "USE_POWER_PINS": True})
     else:
