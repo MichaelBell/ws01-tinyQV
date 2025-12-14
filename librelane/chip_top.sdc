@@ -59,8 +59,8 @@ set spi_clk_setup_delay_value [expr $::env(CLOCK_PERIOD) * 0.18]
 set_output_delay -clock $clocks -max $spi_clk_setup_delay_value {bidir_PAD[11]}
 
 # Delays on user outputs
-set_output_delay -clock $clocks -min 1 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24]}
-set_output_delay -clock $clocks -max 2 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24]}
+set_output_delay -clock $clocks -min 2 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24]}
+set_output_delay -clock $clocks -max 1 {bidir_PAD[16] bidir_PAD[17] bidir_PAD[18] bidir_PAD[19] bidir_PAD[20] bidir_PAD[21] bidir_PAD[22] bidir_PAD[23] bidir_PAD[24]}
 
 # Input-only pads
 set clk_core_input_ports [get_ports { 

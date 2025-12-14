@@ -129,8 +129,8 @@ CLOCK_NET: clk_pad/Y
 CLOCK_PERIOD: 41.6 # 24 MHz
 
 # Fix hold violations
-PL_RESIZER_HOLD_SLACK_MARGIN: 0.35
-GRT_RESIZER_HOLD_SLACK_MARGIN: 0.3
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.15
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
 
 # Increase for more logic
 # on your die
@@ -182,9 +182,9 @@ LIB:
     - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_fd_io__ff_125C_3v63.lib
     - pdk_dir::libs.ref/gf180mcu_fd_io/lib/gf180mcu_ws_io__ff_n40C_5v50.lib
 
-# Setup margin - these tweaks might not be necessary with 5V?
-PL_RESIZER_SETUP_SLACK_MARGIN: 4.0
-GRT_RESIZER_SETUP_SLACK_MARGIN: 3.5
+# Setup margin as not resizing on slow corners
+PL_RESIZER_SETUP_SLACK_MARGIN: 5.75
+GRT_RESIZER_SETUP_SLACK_MARGIN: 5.5
 RSZ_CORNERS:
 - nom_tt_025C_5v00
 - nom_ff_n40C_5v50
@@ -227,7 +227,7 @@ STA_CORNERS:
 
 DEFAULT_CORNER: nom_tt_025C_3v30
 
-MAX_TRANSITION_CONSTRAINT: 2
+MAX_TRANSITION_CONSTRAINT: 1.8
 
 SYNTH_AUTONAME: True
 
