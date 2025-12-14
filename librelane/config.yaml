@@ -261,7 +261,7 @@ SYNTH_STRATEGY: "AREA 3"
 # Do not error on magic DRC violations
 # Note: Passing magic DRC is not required for the submission.
 # However, it is recommended to fix or carefully review all violations.
-ERROR_ON_MAGIC_DRC: False
+#ERROR_ON_MAGIC_DRC: False
 
 # Prevent false positive DRC errors in I/O cells
 MAGIC_GDS_FLATGLOB:
