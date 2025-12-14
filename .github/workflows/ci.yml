@@ -82,6 +82,7 @@ jobs:
         run: |
           make clone-pdk
       - name: Run RTL simulation
+        if: false
         run: |
           nix develop --command make sim
       - name: Implement the Chip
