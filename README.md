@@ -6,7 +6,7 @@ TinyQV is an RV32EC SoC.  It executes instructions directly from a QSPI flash (e
 
 It includes:
 
-* UART, SPI and PWM peripherals
+* UART, [SPI](https://github.com/TinyTapeout/ttsky25a-tinyQV/blob/main/docs/user_peripherals/30_spi.md) and [PWM](https://github.com/TinyTapeout/ttsky25a-tinyQV/blob/main/docs/user_peripherals/21_matt_pwm.md) peripherals
 * Tiny Tapeout [Gamepad Pmod](https://tinytapeout.com/specs/pinouts/#game-controllers) support
 * [AY8913](https://github.com/TinyTapeout/ttsky25a-tinyQVb/blob/main/docs/user_peripherals/20_AY8913.md) and [PWL synth](https://github.com/TinyTapeout/ttsky25a-tinyQV/blob/main/docs/user_peripherals/33_pwl_synth.md) audio synthesizers
 * [PRISM](https://github.com/TinyTapeout/ttsky25a-tinyQV/blob/main/docs/user_peripherals/08_prism.md) and [Pulse TX](https://github.com/TinyTapeout/ttsky25a-tinyQV/blob/main/docs/user_peripherals/11_pulse_transmitter.md) programmable IO blocks
