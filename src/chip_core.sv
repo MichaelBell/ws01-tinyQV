@@ -44,13 +44,14 @@ module chip_core #(
     assign bidir_oe[7:0] = '0;
     assign bidir_out[7:0] = '0;
 
-    assign bidir_oe[29:16] = '1;
+    assign bidir_oe[28:16] = '1;
     assign bidir_oe[32:30] = '0;
     assign bidir_out[32:30] = '0;
+    assign bidir_ie[32:30] = '1;
 
     assign bidir_cs = '0;
     assign bidir_sl = '0;
-    assign bidir_ie[32:0] = ~bidir_oe[32:0];
+    assign bidir_ie[28:0] = ~bidir_oe[28:0];
     assign bidir_pu[7:0] = '0;
     assign bidir_pu[32:16] = '0;
     assign bidir_pd[7:0] = '0;
@@ -81,7 +82,9 @@ module chip_core #(
     assign bidir_out[15] = prog_n ? uio_out[7] : '1;           // RAM B CS
     assign bidir_oe[15] = prog_n ? uio_oe[7] : '0;
 
-    assign bidir_out[29] = prog_n ? 1'b1 : bidir_in[10];
+    assign bidir_out[29] = prog_n ? 1'b0 : bidir_in[10];
+    assign bidir_oe[29] = prog_n ? 1'b0 : 1'b1;
+    assign bidir_ie[29] = 1'b0;
 
     assign bidir_ie[NUM_BIDIR_PADS-1:33] = '0;
     assign bidir_oe[NUM_BIDIR_PADS-1:33] = '0;

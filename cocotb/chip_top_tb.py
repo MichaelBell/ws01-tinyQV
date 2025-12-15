@@ -356,9 +356,11 @@ async def test_prog(dut):
 
     await set_defaults(dut)
     await start_clock(dut.clk_PAD)
+    assert dut.prog_miso.value == 'Z'
     dut.rst_n_PAD.value = 0
     dut.qspi_data.value = "ZZZZ"
     await Timer(200, "ns")
+    assert dut.prog_miso.value == 'Z'
 
     dut.prog_n.value = 0
 
@@ -374,6 +376,10 @@ async def test_prog(dut):
         assert dut.bidir_PAD.value[11] == (1 if (i & 2) else 0)
         assert dut.bidir_PAD.value[9] == (1 if (i & 4) else 0)
         assert dut.prog_miso.value == (1 if (i & 8) else 0)
+
+    dut.prog_n.value = 1
+    await Timer(10, "ns")
+    assert dut.prog_miso.value == 'Z'
 
 def chip_top_runner():
 
