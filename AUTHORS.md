@@ -17,6 +17,7 @@ All categories arranged alphabetically.
 ## TinyQV Peripherals
 
 * [Adam Gebregziaber](https://github.com/Adhaywe)
+* [Han](https://github.com/HX2003)
 * [htfab](https://github.com/htfab)
 * [Ken Pettit](https://github.com/kdp1965)
 * [Laurie Hedge](https://github.com/laurie-hedge)
