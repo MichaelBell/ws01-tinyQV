@@ -65,6 +65,8 @@ The default pinout from the project template is used for all project sizes.
 | 0xFFFFC00 - 0xFFFFDFF | Scratch RAM |
 | 0xFFFFF00 - 0xFFFFF07 | TIME |
 
+Due to an implementation bug, multi-word loads and stores can't be used against Scratch RAM.
+
 ### DEBUG
 
 | Register | Address | Description |
